@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LarbYaso Garage Prototype</title>
+    <meta name="description" content="LarbYaso Garage system prototype demonstrating key user flows">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Login / Register Screen -->
+    <div id="login-view" class="view active" style="align-items: center; justify-content: center; flex-direction: column;">
+        <div class="glass-panel login-panel" id="login-panel">
+            <div class="logo">
+                <div class="icon">🔧</div>
+                <h1>LarbYaso Garage</h1>
+            </div>
+            <p class="subtitle">Enter your credentials to access the system</p>
+            
+            <form onsubmit="event.preventDefault(); processLogin();" style="text-align: left; margin-top: 24px;">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="login-user" class="form-control" placeholder="e.g. customer1" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-pass" class="form-control" placeholder="••••••••" required>
+                </div>
+                <!-- Error msg placeholder -->
+                <p id="login-error" style="color: var(--danger); font-size: 0.85rem; display: none;">Invalid credentials</p>
+                
+                <button type="submit" class="btn primary" style="width: 100%; margin-top: 16px;">Log In</button>
+            </form>
+            <p style="margin-top: 24px; font-size: 0.9rem; color: var(--text-muted);">
+                Don't have an account? <a href="#" onclick="toggleAuthView('register')" style="color: var(--primary);">Register as Customer</a>
+            </p>
+            <div style="margin-top: 16px; font-size: 0.8rem; color: rgba(255,255,255,0.4); text-align: left; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px;">
+                <strong>Demo Accounts:</strong><br>
+                Staff: username: <code>staff</code> | pass: <code>admin123</code><br>
+                Mechanic: username: <code>mechanic</code> | pass: <code>wrench123</code><br>
+                Customer: username: <code>customer</code> | pass: <code>cust123</code>
+            </div>
+        </div>
+
+        <div class="glass-panel login-panel" id="register-panel" style="display: none;">
+            <div class="logo">
+                <div class="icon">👤</div>
+                <h2>Customer Registration</h2>
+            </div>
+            
+            <form onsubmit="event.preventDefault(); processRegister();" style="text-align: left; margin-top: 24px;">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="reg-name" class="form-control" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="reg-user" class="form-control" placeholder="Choose a username" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="reg-pass" class="form-control" placeholder="Create password" required>
+                </div>
+                <button type="submit" class="btn primary" style="width: 100%; margin-top: 16px;">Create Account</button>
+            </form>
+            <p style="margin-top: 24px; font-size: 0.9rem; color: var(--text-muted);">
+                Already registered? <a href="#" onclick="toggleAuthView('login')" style="color: var(--primary);">Back to Login</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- MAIN APP LAYOUT (hidden initially) -->
+    <div id="app-layout" class="view">
+        <nav class="sidebar">
+            <div class="logo small">
+                <div class="icon">🔧</div>
+                <h2>LarbYaso</h2>
+            </div>
+            <ul class="nav-links" id="sidebar-nav">
+                <!-- Nav populated via JS -->
+            </ul>
+            <div class="user-profile">
+                <div class="avatar" id="user-avatar">C</div>
+                <div class="info">
+                    <div class="name" id="user-name">Customer</div>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </nav>
+        <main class="content-area">
+            <header class="topbar" style="position: relative; z-index: 99999;">
+                <h2 id="page-title">Dashboard</h2>
+                
+                <div style="display: flex; align-items: center; gap: 24px;">
+                    <!-- Global Search -->
+                    <div id="global-search-container" style="display: none; position: relative;">
+                        <input type="text" id="global-search-input" class="form-control" placeholder="Search Plate No. (XYZ-1234)" style="width: 250px; padding-left: 36px; border-radius: 20px;">
+                        <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: 0.6;">🔍</span>
+                        <button class="btn success" style="padding: 6px 12px; font-size: 0.8rem; position: absolute; right: 4px; top: 4px;" onclick="performGlobalSearch()">Search</button>
+                    </div>
+
+                    <!-- Notification Bell -->
+                    <div id="notification-bell" style="position: relative; cursor: pointer; display: none;" onclick="toggleNotifications()">
+                        <div style="font-size: 1.4rem;">🔔</div>
+                        <div id="notif-badge" style="position: absolute; top: -4px; right: -4px; background: var(--danger); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; font-weight: bold;">3</div>
+                        <!-- Dropdown -->
+                        <div id="notif-dropdown" class="glass-panel" style="display: none; position: absolute; top: 100%; right: 0; width: 320px; z-index: 99999; padding: 16px; margin-top: 16px; cursor: default;" onclick="event.stopPropagation()">
+                            <h4 style="margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Automated Alerts</h4>
+                            <div id="notif-list" style="display: flex; flex-direction: column; gap: 12px; max-height: 300px; overflow-y: auto;">
+                                <!-- Generated by JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="status-indicator">Connected</div>
+                </div>
+            </header>
+            <div id="main-content" class="dynamic-content" style="position: relative; z-index: 1;">
+                <!-- Content injected here -->
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
